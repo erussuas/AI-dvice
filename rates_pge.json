@@ -1,0 +1,233 @@
+{
+  "utility": "Pacific Gas and Electric Company (PG&E)",
+  "state": "California",
+  "regulator": "California Public Utilities Commission (CPUC)",
+  "effective_date": "2026-03-01",
+  "currency": "USD",
+  "seasons": {
+    "summer": {"months": [6,7,8,9], "label": "Summer (Jun–Sep)"},
+    "winter": {"months": [1,2,3,4,5,10,11,12], "label": "Winter (Oct–May)"}
+  },
+  "tou_periods": {
+    "peak":         {"summer": "4:00 PM – 9:00 PM every day", "winter": "4:00 PM – 9:00 PM every day"},
+    "part_peak":    {"summer": "2:00 PM – 4:00 PM and 9:00 PM – 11:00 PM every day", "winter": "N/A (B-1 only: 2–4 PM and 9–11 PM)"},
+    "off_peak":     {"summer": "All other hours", "winter": "All other hours"},
+    "super_off_peak": {"summer": "N/A", "winter": "9:00 AM – 2:00 PM in March, April, May only"}
+  },
+  "voltage_classes": {
+    "secondary": "Secondary voltage (standard service, most C&I customers)",
+    "primary": "Primary voltage (customer-owned transformer, typically >500 kW)",
+    "transmission": "Transmission voltage (very large industrial, typically >5 MW)"
+  },
+  "rateSchedules": {
+    "B-1": {
+      "schedule": "B-1",
+      "name": "Small General Service",
+      "type": "energy_only_tou",
+      "applicability": "Single-phase and polyphase alternating-current service. Not available for residential, agricultural, or EV charging equipment customers. Maximum demand must be below 75 kW for three consecutive months in the most recent 12 months.",
+      "demandEligibility_kW": {"max": 75, "months": 3, "window": "rolling_12_month"},
+      "voltageClasses": ["secondary"],
+      "customerCharge_per_meter_per_day": {
+        "single_phase": 0.32854,
+        "poly_phase": 0.82136
+      },
+      "energyCharge_per_kWh": {
+        "summer": {
+          "peak": 0.47087,
+          "part_peak": 0.42164,
+          "off_peak": 0.40083
+        },
+        "winter": {
+          "peak": 0.39545,
+          "off_peak": 0.37933,
+          "super_off_peak": 0.36291
+        }
+      },
+      "demandCharge": null,
+      "pdp": {
+        "event_charge_per_kWh": 0.60,
+        "credits": {
+          "peak_summer_per_kWh": -0.06014,
+          "part_peak_summer_per_kWh": -0.01787
+        }
+      },
+      "notes": "No demand charge. Energy-only TOU. Mandatory transition from A-1 since March 2021. B1-ST storage variant available with demand charge of $7.86/kW (2–11 PM only)."
+    },
+    "B-6": {
+      "schedule": "B-6",
+      "name": "Small General TOU Demand Service",
+      "type": "demand_and_energy_tou",
+      "applicability": "Small commercial and industrial customers. Demand between 75 kW and 499 kW. Optional for customers below 75 kW who prefer demand metering.",
+      "demandEligibility_kW": {"min": 75, "max": 499, "months": 3, "window": "rolling_12_month"},
+      "voltageClasses": ["secondary", "primary"],
+      "customerCharge_per_meter_per_day": {
+        "secondary": 13.00,
+        "primary": 13.00
+      },
+      "energyCharge_per_kWh": {
+        "summer": {
+          "peak": 0.18648,
+          "part_peak": 0.14775,
+          "off_peak": 0.12037
+        },
+        "winter": {
+          "peak": 0.16188,
+          "off_peak": 0.12026,
+          "super_off_peak": 0.06442
+        }
+      },
+      "demandCharge_per_kW": {
+        "summer": {
+          "max_peak_demand": 20.00,
+          "max_demand": 15.00
+        },
+        "winter": {
+          "max_peak_demand": 2.00,
+          "max_demand": 15.00
+        }
+      },
+      "notes": "Approximate rates — confirm with current PG&E tariff sheet. Transition from A-6 mandatory since March 2021."
+    },
+    "B-10": {
+      "schedule": "B-10",
+      "name": "Medium General Demand-Metered Service",
+      "type": "demand_and_energy_tou",
+      "applicability": "Medium commercial and industrial customers. Maximum demand between 75 kW and 499 kW. Demand-metered service without the full TOU complexity of B-19.",
+      "demandEligibility_kW": {"min": 75, "max": 499, "months": 3, "window": "rolling_12_month"},
+      "voltageClasses": ["secondary", "primary"],
+      "customerCharge_per_meter_per_day": {
+        "secondary": 20.00,
+        "primary": 20.00
+      },
+      "energyCharge_per_kWh": {
+        "summer": {
+          "peak": 0.17500,
+          "part_peak": 0.14000,
+          "off_peak": 0.11500
+        },
+        "winter": {
+          "peak": 0.15500,
+          "off_peak": 0.11500,
+          "super_off_peak": 0.06000
+        }
+      },
+      "demandCharge_per_kW": {
+        "summer": {
+          "max_peak_demand": 25.00,
+          "max_demand": 18.00
+        },
+        "winter": {
+          "max_peak_demand": 2.00,
+          "max_demand": 18.00
+        }
+      },
+      "notes": "Approximate rates — confirm with current PG&E tariff sheet. Transition from A-10 mandatory since March 2021."
+    },
+    "B-19": {
+      "schedule": "B-19",
+      "name": "Medium General Demand-Metered TOU Service",
+      "type": "demand_and_energy_tou",
+      "applicability": "Mandatory for customers with maximum billing demand exceeding 499 kW for at least 3 consecutive months in the most recent 12-month period, but below 1,000 kW. Voluntary for customers below 500 kW. Not applicable to agricultural customers (70%+ agricultural end-use).",
+      "demandEligibility_kW": {"min": 500, "max": 999, "months": 3, "window": "rolling_12_month"},
+      "voltageClasses": ["secondary", "primary", "transmission"],
+      "customerCharge_per_meter_per_day": {
+        "mandatory": {
+          "secondary": 58.62824,
+          "primary": 87.34546,
+          "transmission": 117.10726
+        },
+        "voluntary": {
+          "secondary": 11.36882,
+          "primary": 11.36882,
+          "transmission": 11.36882
+        }
+      },
+      "energyCharge_per_kWh": {
+        "summer": {
+          "secondary": {"peak": 0.18648, "part_peak": 0.14775, "off_peak": 0.12037},
+          "primary":   {"peak": 0.16454, "part_peak": 0.13500, "off_peak": 0.10931},
+          "transmission": {"peak": 0.14803, "part_peak": 0.13556, "off_peak": 0.10902}
+        },
+        "winter": {
+          "secondary": {"peak": 0.16188, "off_peak": 0.12026, "super_off_peak": 0.06442},
+          "primary":   {"peak": 0.14737, "off_peak": 0.10963, "super_off_peak": 0.05594},
+          "transmission": {"peak": 0.14719, "off_peak": 0.10961, "super_off_peak": 0.05433}
+        }
+      },
+      "demandCharge_per_kW": {
+        "summer": {
+          "secondary":    {"max_peak_demand": 46.16, "max_part_peak_demand": 10.52, "max_demand": 37.37},
+          "primary":      {"max_peak_demand": 37.89, "max_part_peak_demand": 8.54,  "max_demand": 29.11},
+          "transmission": {"max_peak_demand": 14.67, "max_part_peak_demand": 3.67,  "max_demand": 16.94}
+        },
+        "winter": {
+          "secondary":    {"max_peak_demand": 2.31,  "max_demand": 37.37},
+          "primary":      {"max_peak_demand": 1.69,  "max_demand": 29.11},
+          "transmission": {"max_peak_demand": 1.41,  "max_demand": 16.94}
+        }
+      },
+      "powerFactorAdjustment_per_kWh_per_pct": 0.00005,
+      "pdp": {
+        "event_charge_per_kWh": 0.90,
+        "credits": {
+          "summer": {
+            "secondary":    {"peak_demand_per_kW": -6.72, "part_peak_demand_per_kW": -0.98},
+            "primary":      {"peak_demand_per_kW": -6.61, "part_peak_demand_per_kW": -0.97},
+            "transmission": {"peak_demand_per_kW": -5.46, "part_peak_demand_per_kW": -1.37}
+          }
+        }
+      },
+      "notes": "Effective March 1, 2026 (Advice 7846-E). Replaced legacy Schedule E-19 mandatory March 2021. Option R available for qualifying solar/storage customers. Option S available for storage. Power factor based on 85% — adjustments apply above/below."
+    },
+    "B-20": {
+      "schedule": "B-20",
+      "name": "Large General Service — 1,000 kW and Above",
+      "type": "demand_and_energy_tou",
+      "applicability": "Mandatory for customers with maximum demand exceeding 999 kW for at least 3 consecutive months in the most recent 12-month period. Must also have exceeded 999 kW for at least 5 of the previous 12 billing months OR for any 3 consecutive months of the previous 14 months to remain on B-20. Not applicable to agricultural customers (70%+ agricultural use).",
+      "demandEligibility_kW": {"min": 1000, "months": 3, "window": "rolling_12_month"},
+      "retentionCriteria": "Must exceed 999 kW for 5 of previous 12 months OR 3 consecutive months of previous 14 months",
+      "voltageClasses": ["secondary", "primary", "transmission"],
+      "customerCharge_per_meter_per_day": {
+        "secondary":    107.36636,
+        "primary":      110.32836,
+        "transmission": 331.86645
+      },
+      "energyCharge_per_kWh": {
+        "summer": {
+          "secondary":    {"peak": 0.17702, "part_peak": 0.14227, "off_peak": 0.11482},
+          "primary":      {"peak": 0.17322, "part_peak": 0.13597, "off_peak": 0.10998},
+          "transmission": {"peak": 0.15702, "part_peak": 0.13245, "off_peak": 0.10504}
+        },
+        "winter": {
+          "secondary":    {"peak": 0.15632, "off_peak": 0.11460, "super_off_peak": 0.05872},
+          "primary":      {"peak": 0.14951, "off_peak": 0.11005, "super_off_peak": 0.05406},
+          "transmission": {"peak": 0.15043, "off_peak": 0.10085, "super_off_peak": 0.05134}
+        }
+      },
+      "demandCharge_per_kW": {
+        "summer": {
+          "secondary":    {"max_peak_demand": 41.35, "max_part_peak_demand": 9.27, "max_demand": 39.08},
+          "primary":      {"max_peak_demand": 43.88, "max_part_peak_demand": 9.45, "max_demand": 34.28},
+          "transmission": {"max_peak_demand": 22.28, "max_part_peak_demand": 5.31, "max_demand": 17.19}
+        },
+        "winter": {
+          "secondary":    {"max_peak_demand": 2.32, "max_demand": 39.08},
+          "primary":      {"max_peak_demand": 2.34, "max_demand": 34.28},
+          "transmission": {"max_peak_demand": 2.97, "max_demand": 17.19}
+        }
+      },
+      "powerFactorAdjustment_per_kWh_per_pct": 0.00005,
+      "pdp": {
+        "event_charge_per_kWh": 0.90,
+        "credits": {
+          "summer": {
+            "secondary":    {"peak_demand_per_kW": -7.21, "part_peak_demand_per_kW": -1.05},
+            "primary":      {"peak_demand_per_kW": -8.24, "part_peak_demand_per_kW": -1.13},
+            "transmission": {"peak_demand_per_kW": -6.56, "part_peak_demand_per_kW": -1.56}
+          }
+        }
+      },
+      "notes": "Effective March 1, 2026 (Advice 7846-E). Replaced legacy Schedule E-20 mandatory March 2021. Option R available for qualifying solar/storage customers. Option S available for storage. Power factor based on 85% — bill adjusted for deviation. 15-minute interval metering required."
+    }
+  }
+}

@@ -1,0 +1,643 @@
+{
+  "utility": "Menasha Electric and Water Utilities",
+  "state": "Wisconsin",
+  "regulator": "Public Service Commission of Wisconsin (PSCW)",
+  "docket": "3560-ER-108",
+  "amendment": 87,
+  "effective_date": "2025-06-01",
+  "currency": "USD",
+
+  "adjustmentClauses": {
+    "PCAC": {
+      "schedule": "PCAC",
+      "description": "Power Cost Adjustment Clause — applies to all non-PCAC2 metered rates",
+      "applicableTo": ["Rg-1","Rg-2","Gs-1","Gs-2","Cp-1","Cp-2","Cp-3","Ms-1","Ms-3","TE-1"],
+      "formula": "A = (C / S) - U",
+      "variables": {
+        "A": "Power cost adjustment rate ($/kWh), rounded to 4 decimal places",
+        "C": "Non-PCAC2 cost of power purchased in the most recent month ($). Recorded in Acct 555 (Class A&B) or Acct 545 (Class C)",
+        "S": "Total non-PCAC2 kWh sold in the most recent month",
+        "U": "Base cost of power = $0.0792/kWh (constant until changed by PSCW)"
+      },
+      "baseCost_per_kWh": 0.0792,
+      "roundingRule": "Nearest 1/100th of a cent",
+      "notificationTrigger": "If monthly adjustment exceeds $0.0150/kWh more than 3 times in any 12-month rolling period, utility must notify PSCW"
+    },
+    "PCAC2": {
+      "schedule": "PCAC2",
+      "description": "Power Cost Adjustment Clause 2 — applies exclusively to Cp-4 tariff",
+      "applicableTo": ["Cp-4"],
+      "demandCostAdjustment": {
+        "formula": "DCA = (WDC / RBD) - BDCF",
+        "variables": {
+          "DCA": "Demand-related adjustment rate ($/kW), rounded to 3 decimal places, applied to on-peak billing demand",
+          "WDC": "Current demand-related cost of power purchased/produced for Cp-4 customers ($). Includes facilities charge and demand-related charges.",
+          "RBD": "Retail on-peak billing demands of Cp-4 customers in the most recent month (kW)",
+          "BDCF": "Base Demand Cost Factor ($/kW)"
+        },
+        "BDCF_by_month": {
+          "July_August": 21.853,
+          "June_September": 17.962,
+          "all_other_months": 16.497
+        }
+      },
+      "energyCostAdjustment": {
+        "formula": "ECA = (WEC / RE) - BECF",
+        "variables": {
+          "ECA": "Energy-related adjustment rate ($/kWh), rounded to 4 decimal places, applied to all Cp-4 metered sales",
+          "WEC": "Current energy-related cost of power purchased/produced for Cp-4 customers ($). Includes energy-related cost components and reactive energy charges.",
+          "RE": "Total kWh sold to Cp-4 customers in the most recent month",
+          "BECF": "Base Energy Cost Factor = $0.0432/kWh (constant until changed by PSCW)"
+        },
+        "BECF_per_kWh": 0.0432
+      }
+    }
+  },
+
+  "rateSchedules": {
+
+    "Rg-1": {
+      "schedule": "Rg-1",
+      "name": "Residential Service",
+      "type": "energy_only",
+      "applicability": "Residential single-phase and three-phase customers for ordinary household purposes. Single-phase motors ≤5 HP individual rated capacity (utility permission required above).",
+      "customerCharge": {
+        "single_phase_per_month": 12.00,
+        "three_phase_per_month": 21.00
+      },
+      "energyCharge_per_kWh": 0.1140,
+      "demandCharge": null,
+      "pricingPeriods": null,
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge",
+      "latePaymentCharge": "1% per month on unpaid balance if not paid within 20 days of issuance",
+      "discounts": null,
+      "CTC1_rider": {
+        "rate": "3.0% of total electric bill",
+        "cap_per_month": 0.97
+      }
+    },
+
+    "Rg-2": {
+      "schedule": "Rg-2",
+      "name": "Residential Service – Optional Time of Day",
+      "type": "time_of_use",
+      "applicability": "Optional to all Rg-1 customers. Must apply for service. Minimum 1-year commitment once enrolled. Waives right to billing adjustments if another schedule would be lower.",
+      "customerCharge": {
+        "single_phase_per_month": 12.00,
+        "three_phase_per_month": 21.00
+      },
+      "energyCharge_per_kWh": {
+        "on_peak": 0.1999,
+        "off_peak": 0.0617
+      },
+      "demandCharge": null,
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times including all day Saturday, Sunday, and holidays",
+        "holidays": ["New Year's Day","Memorial Day","Independence Day","Labor Day","Thanksgiving Day","Christmas Day"]
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge",
+      "annualReview": "Utility reviews billing annually per Wis. Admin. Code ch. PSC 113",
+      "movingProvision": "If customer moves within service territory, both original and new customer may retain TOD billing or transfer to Rg-1 at no cost",
+      "jointResidentialCommercial": "Billed on a rate determined by customer load",
+      "discounts": null,
+      "CTC1_rider": {
+        "rate": "3.0% of total electric bill",
+        "cap_per_month": 0.97
+      }
+    },
+
+    "Gs-1": {
+      "schedule": "Gs-1",
+      "name": "General Service",
+      "type": "energy_only",
+      "applicability": "Single and three-phase customers: commercial, institutional, government, farm, and other. Monthly Maximum Measured Demand must not exceed 50 kW for 3 or more months in a consecutive 12-month period.",
+      "demandEligibilityThreshold_kW": { "max": 50, "months": 3, "window": "consecutive_12_month" },
+      "customerCharge": {
+        "single_phase_per_month": 13.00,
+        "three_phase_per_month": 22.00
+      },
+      "energyCharge_per_kWh": 0.1164,
+      "demandCharge": null,
+      "pricingPeriods": null,
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge",
+      "demandDetermination": "Maximum Measured Demand = average kWh in 15 consecutive minutes of greatest consumption. Meter reset monthly.",
+      "farmCustomerDefinition": "Person/org using electric service for individual farm operation or residential use on farm. Farm = tract ≥3 acres used for agricultural/dairy/livestock/poultry/floriculture, or where principal income derives from farm.",
+      "discounts": null,
+      "CTC1_rider": {
+        "rate": "3.0% of total electric bill",
+        "cap_per_month": 1.95
+      }
+    },
+
+    "Gs-2": {
+      "schedule": "Gs-2",
+      "name": "General Service – Optional Time of Day",
+      "type": "time_of_use",
+      "applicability": "Optional to all Gs-1 customers. Must apply. Minimum 1-year commitment. Waives right to billing adjustments if another schedule would be lower.",
+      "demandEligibilityThreshold_kW": { "max": 50, "months": 3, "window": "consecutive_12_month" },
+      "customerCharge": {
+        "single_phase_per_month": 13.00,
+        "three_phase_per_month": 22.00
+      },
+      "energyCharge_per_kWh": {
+        "on_peak": 0.1967,
+        "off_peak": 0.0607
+      },
+      "demandCharge": null,
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times including all day Saturday, Sunday, and holidays",
+        "holidays": ["New Year's Day","Memorial Day","Independence Day","Labor Day","Thanksgiving Day","Christmas Day"]
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge",
+      "movingProvision": "Customer may retain TOD billing or transfer to Gs-1 at no cost",
+      "jointResidentialCommercial": "Billed on a rate determined by customer load",
+      "annualReview": "Utility reviews billing annually per Wis. Admin. Code ch. PSC 113",
+      "discounts": null,
+      "CTC1_rider": {
+        "rate": "3.0% of total electric bill",
+        "cap_per_month": 1.95
+      }
+    },
+
+    "Cp-1": {
+      "schedule": "Cp-1",
+      "name": "Small Power Service",
+      "type": "demand_and_energy_tou",
+      "applicability": "All customer types. Monthly Maximum Measured Demand >50 kW and ≤200 kW for 3 or more months in a consecutive 12-month period.",
+      "demandEligibilityThreshold_kW": { "min": 50, "max": 200, "months": 3, "window": "consecutive_12_month" },
+      "exitThreshold": "Remains on Cp-1 until demand <50 kW for 12 consecutive months",
+      "customerCharge_per_month": 50.00,
+      "distributionDemandCharge_per_kW": 2.50,
+      "demandCharge_per_kW_onPeak": 8.50,
+      "energyCharge_per_kWh": {
+        "on_peak": 0.0862,
+        "off_peak": 0.0544
+      },
+      "energyLimiter_per_kWh": 0.1418,
+      "energyLimiterLogic": "Each month, customer is billed the LESSER of: (1) Energy Limiter rate × total kWh, OR (2) Energy Charge + Demand Charge combined. Customer charge, distribution demand charge, and PCAC are always billed regardless.",
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times including all day Saturday, Sunday, and holidays",
+        "holidays": ["New Year's Day","Memorial Day","Independence Day","Labor Day","Thanksgiving Day","Christmas Day"]
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge + distribution demand charge",
+      "discounts": {
+        "primaryMetering": {
+          "discount_pct": 2.00,
+          "appliesTo": ["energy charge","distribution demand charge","demand charge"],
+          "excludes": ["PCAC","customer charge"]
+        },
+        "transformerOwnership": {
+          "credit_per_kW_distribution_demand": 0.25,
+          "notes": "Customer owns and maintains own transformer/substation. Equipment subject to utility inspection and approval."
+        },
+        "applicationSequence": "Primary metering discount applied first, then transformer ownership credit"
+      },
+      "demandDetermination": {
+        "maximumMeasuredDemand": "Average kWh in 15 consecutive minutes of greatest consumption. Meter reset monthly.",
+        "distributionDemand": "Highest monthly Maximum Measured Demand in current month or preceding 11-month period (12-month rolling peak)",
+        "onPeakBilledDemand": "On-peak Maximum Measured Demand in the current month"
+      },
+      "CTC1_rider": {
+        "rate": "3.0% of total electric bill",
+        "cap_per_month": 16.35
+      }
+    },
+
+    "Cp-2": {
+      "schedule": "Cp-2",
+      "name": "Large Power Time of Day Service",
+      "type": "demand_and_energy_tou",
+      "applicability": "All customer types. Monthly Maximum Measured Demand >200 kW and ≤1,000 kW for 3 or more months in a consecutive 12-month period.",
+      "demandEligibilityThreshold_kW": { "min": 200, "max": 1000, "months": 3, "window": "consecutive_12_month" },
+      "exitThreshold": "Remains on Cp-2 until demand <200 kW for 12 consecutive months",
+      "customerCharge_per_month": 200.00,
+      "distributionDemandCharge_per_kW": 2.50,
+      "demandCharge_per_kW_onPeak": 12.50,
+      "energyCharge_per_kWh": {
+        "on_peak": 0.0620,
+        "off_peak": 0.0484
+      },
+      "energyLimiter": null,
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times including all day Saturday, Sunday, and holidays",
+        "holidays": ["New Year's Day","Memorial Day","Independence Day","Labor Day","Thanksgiving Day","Christmas Day"]
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge + distribution demand charge",
+      "discounts": {
+        "primaryMetering": {
+          "discount_pct": 2.00,
+          "appliesTo": ["energy charge","distribution demand charge","demand charge"],
+          "excludes": ["reactive component charge","PCAC","customer charge"]
+        },
+        "transformerOwnership": {
+          "credit_per_kW_distribution_demand": 0.25,
+          "notes": "Customer owns and maintains own transformer/substation. Subject to utility inspection."
+        },
+        "applicationSequence": "Primary metering discount applied first, then transformer ownership credit"
+      },
+      "demandDetermination": {
+        "maximumMeasuredDemand": "Average kWh in 15 consecutive minutes of greatest consumption. Meter reset monthly.",
+        "distributionDemand": "Highest monthly Maximum Measured Demand in current month or preceding 11-month period (12-month rolling peak)",
+        "onPeakBilledDemand": "On-peak Maximum Measured Demand in the current month"
+      },
+      "CTC1_rider": {
+        "rate": "3.0% of total electric bill",
+        "cap_per_month": 49.85
+      }
+    },
+
+    "Cp-3": {
+      "schedule": "Cp-3",
+      "name": "Industrial Power Time-of-Day Service",
+      "type": "demand_and_energy_tou",
+      "applicability": "All customer types. Monthly Maximum Measured Demand >1,000 kW and ≤5,000 kW for 3 or more months in a consecutive 12-month period.",
+      "demandEligibilityThreshold_kW": { "min": 1000, "max": 5000, "months": 3, "window": "consecutive_12_month" },
+      "exitThreshold": "Remains on Cp-3 until demand <1,000 kW for 12 consecutive months",
+      "customerCharge_per_month": 300.00,
+      "distributionDemandCharge_per_kW": 2.50,
+      "demandCharge_per_kW_onPeak": 14.00,
+      "energyCharge_per_kWh": {
+        "on_peak": 0.0587,
+        "off_peak": 0.0400
+      },
+      "energyLimiter": null,
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times including all day Saturday, Sunday, and holidays",
+        "holidays": ["New Year's Day","Memorial Day","Independence Day","Labor Day","Thanksgiving Day","Christmas Day"]
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge + distribution demand charge",
+      "discounts": {
+        "primaryMetering": {
+          "discount_pct": 2.00,
+          "appliesTo": ["energy charge","distribution demand charge","demand charge"],
+          "excludes": ["reactive component charge","PCAC","customer charge"]
+        },
+        "transformerOwnership": {
+          "credit_per_kW_distribution_demand": 0.25,
+          "notes": "Customer owns and maintains own transformer/substation. Subject to utility inspection."
+        },
+        "applicationSequence": "Primary metering discount applied first, then transformer ownership credit"
+      },
+      "demandDetermination": {
+        "maximumMeasuredDemand": "Average kWh in 15 consecutive minutes of greatest consumption. Meter reset monthly.",
+        "distributionDemand": "Highest monthly Maximum Measured Demand in current month or preceding 11-month period (12-month rolling peak)",
+        "onPeakBilledDemand": "On-peak Maximum Measured Demand in the current month"
+      },
+      "CTC1_rider": {
+        "rate": "3.0% of total electric bill",
+        "cap_per_month": 82.50
+      }
+    },
+
+    "Cp-4": {
+      "schedule": "Cp-4",
+      "name": "Large Industrial Power Time-of-Day Service",
+      "type": "demand_and_energy_tou",
+      "applicability": "All customer types. Monthly Maximum Measured Demand >5,000 kW for 3 or more months in a consecutive 12-month period AND calculated load factor ≥85%.",
+      "demandEligibilityThreshold_kW": { "min": 5000, "months": 3, "window": "consecutive_12_month" },
+      "loadFactorRequirement_pct": 85,
+      "loadFactorFormula": "Load Factor = kWh / (kW × 730), where kW = Maximum Measured Demand and 730 = avg hours/month",
+      "exitThreshold": "Remains on Cp-4 until demand <5,000 kW for 12 consecutive months",
+      "customerCharge_per_month": 500.00,
+      "distributionDemandCharge_per_kW": 3.00,
+      "demandCharge_per_kW_onPeak": {
+        "July_August": 21.853,
+        "June_September": 17.962,
+        "all_other_months": 16.497
+      },
+      "energyCharge_per_kWh": {
+        "on_peak": 0.0573,
+        "off_peak": 0.0356
+      },
+      "energyLimiter": null,
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times including all day Saturday, Sunday, and holidays",
+        "holidays": ["New Year's Day","Memorial Day","Independence Day","Labor Day","Thanksgiving Day","Christmas Day"]
+      },
+      "adjustmentClause": "PCAC2",
+      "minimumBill": "Customer charge + distribution demand charge",
+      "discounts": {
+        "primaryMetering": {
+          "discount_pct": 2.00,
+          "appliesTo": ["energy charge","distribution demand charge","demand charge"],
+          "excludes": ["reactive component charge","PCAC2","customer charge"]
+        },
+        "transformerOwnership": {
+          "credit_per_kW_distribution_demand": 0.25,
+          "notes": "Customer owns and maintains own transformer/substation. Subject to utility inspection."
+        },
+        "applicationSequence": "Primary metering discount applied first, then transformer ownership credit"
+      },
+      "demandDetermination": {
+        "maximumMeasuredDemand": "Average kWh in 15 consecutive minutes of greatest consumption. Meter reset monthly.",
+        "distributionDemand": "Highest monthly Maximum Measured Demand in current month or preceding 11-month period (12-month rolling peak)",
+        "onPeakBilledDemand": "On-peak Maximum Measured Demand in the current month"
+      },
+      "CTC1_rider": {
+        "rate": "3.0% of total electric bill",
+        "cap_per_month": 225.00
+      }
+    },
+
+    "Cp-5": {
+      "schedule": "Cp-5",
+      "name": "Coincident Demand Metering Rider",
+      "type": "rider",
+      "applicability": "Available to Cp-2, Cp-3, and Cp-4 customers with multiple separately-metered service entrances on contiguous properties whose combined Maximum Coincident Demand exceeds applicable threshold (200 kW for Cp-2, 1,000 kW for Cp-3, 5,000 kW for Cp-4) for 3 or more months in consecutive 12-month period.",
+      "customerCharge": "Monthly customer charge per each separately metered location as if served individually on respective Cp-2/Cp-3/Cp-4 schedule",
+      "distributionDemand": "Sum of distribution demands of each separately metered location as if served individually. Utility may bill coincident basis if multiple meters/drops are installed at same premises for utility's convenience.",
+      "demandDetermination": {
+        "maximumMeasuredDemand": "Average kWh in 15 consecutive minutes of greatest consumption to a single metered service point. Meter reset monthly.",
+        "maximumCoincidentDemand": "Greatest single demand in 15 consecutive minutes during the month resulting from combination of all separately metered services",
+        "maximumCoincidentOnPeakDemand": "Maximum Coincident Demand occurring during the on-peak period",
+        "billedDemand": "Same as Cp-2/Cp-3/Cp-4 with On-peak Maximum Demand replaced by Maximum Coincident On-Peak Demand"
+      },
+      "energyCharge": "Same as applicable Cp-2, Cp-3, or Cp-4 schedule",
+      "minimumBill": "Same as applicable Cp-2, Cp-3, or Cp-4 schedule",
+      "generalProvisions": [
+        "Customer class determined by maximum coincident demand",
+        "Customer may terminate with 30 days written notice; responsible for any resulting bill increases",
+        "Primary metered services may only be combined with other primary metered services",
+        "All metering points that can be combined must be combined together",
+        "Utility must annually notify all Cp-2, Cp-3, and Cp-4 customers that coincident billing is available upon request"
+      ]
+    },
+
+    "Ms-1": {
+      "schedule": "Ms-1",
+      "name": "Lighting Service",
+      "type": "lighting",
+      "applicability": "Lighting service. Closed to new mercury vapor lights.",
+      "investmentCharges": {
+        "overhead": {
+          "optionA_noUpfront_utilityMaintained": {
+            "LED_up_to_120W_per_lamp_month": 5.50,
+            "HPS_up_to_250W_per_lamp_month": 5.75,
+            "MH_400W_per_lamp_month": 7.25,
+            "IND_100W_per_lamp_month": 6.75
+          },
+          "optionB_customerContribution_utilityMaintained": {
+            "IND_80W_per_lamp_month": 2.75,
+            "LED_up_to_120W_per_lamp_month": 2.50
+          },
+          "optionC_customerContribution_customerMaintained": {
+            "IND_80W_per_lamp_month": 2.65
+          }
+        },
+        "ornamental": {
+          "optionA_noUpfront_utilityMaintained": {
+            "LED_up_to_120W_per_lamp_month": 11.25,
+            "HPS_up_to_250W_per_lamp_month": 12.25,
+            "MH_400W_per_lamp_month": 12.25
+          },
+          "optionB_customerContribution_utilityMaintained": {
+            "LED_up_to_120W_per_lamp_month": 6.00,
+            "HPS_up_to_250W_per_lamp_month": 6.25
+          },
+          "optionC_customerContribution_customerMaintained": {
+            "LED_up_to_200W_per_lamp_month": 4.75,
+            "HPS_up_to_250W_per_lamp_month": 5.00
+          }
+        }
+      },
+      "energyCharge_per_kWh": 0.0660,
+      "adjustmentClause": "PCAC",
+      "CTC1_rider": "No Charge",
+      "technologyAbbreviations": {
+        "MH": "Metal Halide",
+        "IND": "Induction",
+        "LED": "Light Emitting Diode",
+        "HPS": "High Pressure Sodium"
+      }
+    },
+
+    "Ms-3": {
+      "schedule": "Ms-3",
+      "name": "Athletic Field Lighting Service",
+      "type": "lighting",
+      "applicability": "Sports and athletic field lighting at primary voltages with ≥40 kW connected load. Usage limited to evening hours after 6:00 PM prevailing time.",
+      "customerCharge_per_month": 190.00,
+      "energyCharge_per_kWh": 0.0702,
+      "demandCharge": null,
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge",
+      "CTC1_rider": "No Charge"
+    },
+
+    "NLMP": {
+      "schedule": "NLMP",
+      "name": "New Load Market Pricing Service",
+      "type": "special_contract_market_pricing",
+      "applicability": "Existing customers with Maximum Measured Demand >200 kW for 3+ months in 12-month period AND expected demand growth ≥400 kW; OR new customers with expected peak demand ≥400 kW. Must state NLMP was a factor in decision to expand/take service.",
+      "eligibilityRequirements": [
+        "Informed utility at least 3 months prior to service",
+        "Electric meters recording 15-minute interval data prior to commencement",
+        "Billed on calendar month basis",
+        "Completed application approved by utility",
+        "Energy efficiency assessment completed by Focus on Energy Advisor within 12 months prior or within 6 months after taking service"
+      ],
+      "minimumIncrementalDemand_kW": 400,
+      "minimumMonthsPerYear": 8,
+      "maxEligibleLoad_kW_per_customer": 10000,
+      "notAvailableTo": "Customers transferring existing load from another Wisconsin electric utility",
+      "term_years": 4,
+      "termination": "Customer may terminate on annual anniversary date with 30 days written notice. Customers removed or terminating may not return to NLMP.",
+      "charges": {
+        "administrativeCharge_per_month": 150.00,
+        "incrementalDemandRate": "Pass-through of MISO/WPPI fixed costs including: MISO Resource Adequacy (firm load only), MISO NITS, MISO Schedule items (1,2,10,10-FERC,11,26,33,43), Direct Network Upgrade Charges. Multiplied by distribution loss factor and gross receipts tax factor. Also multiplied by 1.02 for transmission losses.",
+        "incrementalEnergyRate": {
+          "description": "Pass-through of hourly MISO energy costs: Day-Ahead LMP at WEC.WPPI node, RSG, Uplift, Ancillary Services, Market Administration. Plus adder of $0.0005/kWh.",
+          "minimumRate_per_kWh": 0.007
+        },
+        "incrementalDistributionDemandRate": {
+          "option1": "Distribution Demand above Baseline subject to same charges as below-Baseline demand. Customer receives construction allowance per Electric Rules.",
+          "option2": "Distribution Demand above Baseline NOT subject to Distribution Demand charges. Customer does NOT receive construction allowance."
+        }
+      },
+      "baselineLogic": {
+        "existingCustomers": "Most recent 12 consecutive months preceding Approved Application date. Includes Monthly On-Peak Baseline Energy Level, Monthly Off-Peak Baseline Energy Level, Monthly Baseline Demand Level. Baseline Distribution Demand = Distribution Demand in month immediately preceding Approved Application.",
+        "newCustomers": "Based on customer-supplied forecast. Baseline levels ≥70% of Year 1 forecast. After Year 1, adjusted to reflect % of actual Year 1 consumption.",
+        "newCustomerBaselineDistributionDemand": 0
+      },
+      "distributionLossMultiplicationFactor": {
+        "interconnection_gte_100kV": 1.00,
+        "interconnection_gt_12kV_lt_100kV": 1.02,
+        "interconnection_lt_12kV": 1.03
+      },
+      "grossReceiptsTaxFactor": {
+        "applies": "Customers outside municipal boundaries of utility",
+        "factor": 1.0319
+      }
+    },
+
+    "Pgs-1": {
+      "schedule": "Pgs-1",
+      "name": "Parallel Generation (20 kW or less) – Net Energy Billing",
+      "type": "net_metering",
+      "applicability": "Single and three-phase customers with generating facilities ≤20 kW total generating capability connected in parallel with utility and approved by utility.",
+      "billing": "Monthly net energy basis. Customer pays fixed charge and energy charge per their applicable retail rate. Monthly credits = net excess kWh produced × (applicable energy charge + monthly PCAC).",
+      "creditHandling": "Credit balance ≤$25: carried forward to subsequent bills. Credit balance >$25: utility reimburses by check upon request.",
+      "meteringNote": "Ratchet and other reverse-prevention devices removed from meter to allow reverse power flow. Customers with TOU metering may request net energy metering installation.",
+      "customerObligation": "See Wis. Admin. Code ch. PSC 119"
+    },
+
+    "Pgs-2": {
+      "schedule": "Pgs-2",
+      "name": "Customer-Owned Generation Systems (Greater than 20 kW)",
+      "type": "parallel_generation",
+      "applicability": "Single and three-phase customers with generating facilities >20 kW connected in parallel with utility. Customers not desiring to sell energy may negotiate a buy-back rate.",
+      "minimumCharge": "Customer charge",
+      "powerFactor": "Customer must operate at net power factor ≥90%",
+      "energyPayment": "Monthly payments for all electricity delivered to utility at rates per latest wholesale supplier rates (unless not reflecting avoided costs — Commission may set rates on request)",
+      "negotiatedBuyBackRate": "Must be ≤full avoided cost. Utility must respond within 30 days of initial/subsequent proposals. Rejection must include counter-offer. Contracts filed with Commission.",
+      "maintenanceRate": "Lower demand charges available during scheduled maintenance with advance written utility approval. Demand charges prorated based on authorized maintenance days / days in billing period.",
+      "energySuppliedByUtility": "Billed per standard applicable rate schedules"
+    },
+
+    "Pgs-3": {
+      "schedule": "Pgs-3",
+      "name": "Solar Renewable Energy Distributed Generation (Limited Participation)",
+      "type": "solar_buyback",
+      "status": "CLOSED TO NEW CUSTOMERS",
+      "applicability": "Customers owning small solar PV facilities approved by utility. Individual project nameplate capacity limited to ≤6 kW dc or total PV capacity available under tariff, whichever is less. Total PV capacity limit: 16 kW dc (extendable to maximum additional 48 kW dc if unsubscribed capacity available under WPPI Schedule for Purchase of Solar PV Energy).",
+      "meteringCharge_per_month": 1.00,
+      "energyPurchaseRate": "Utility purchases 100% of generator output. Buy-back rate = WPPI Energy's wholesale PV energy buy-back rate per WPPI Schedule for Purchase of Solar PV Energy. Customer receives monthly credit.",
+      "contractRequirement": "10-year contract required. WPPI Energy obtains all Renewable Energy Credits and Attributes.",
+      "interconnectionRequirements": "Per Wis. Admin. Code ch. PSC 119. Interconnection at service voltage only.",
+      "distributionOutages": "No compensation for energy not delivered during distribution outages."
+    },
+
+    "SS": {
+      "schedule": "SS",
+      "name": "Shared Savings (Limited Participation)",
+      "type": "energy_efficiency_financing",
+      "applicability": "Customers served under Gs-1, Gs-2, Cp-1, Cp-2, Cp-3, and Cp-4 implementing eligible energy efficiency projects. Must meet credit requirements and enter Shared Savings agreement.",
+      "programFocus": "Eligible projects where advance utility payment ≤$50,000 (principal focus). Case-by-case up to $500,000 for qualifying expansion/new customer projects.",
+      "maxAdvancePayment": {
+        "standard_per_customer": 50000,
+        "newOrExpansion_gte_200kW_per_customer": 500000
+      },
+      "repaymentTerm_months": 60,
+      "interestRate_pct": 2.0,
+      "underwriter": "WPPI Energy capital",
+      "eligibilityRequirements": [
+        "Completed Shared Savings application approved by utility and WPPI Energy",
+        "Pass credit review",
+        "Enter into contract with utility",
+        "Projects must reduce electric use and/or demand for duration of repayment period",
+        "Projects must meet minimum efficiency requirements aligned with Wisconsin Focus on Energy program",
+        "Customer agrees to right of utility to remove equipment at customer's expense in event of default",
+        "Submit Certificate of Project Completion upon completion"
+      ]
+    },
+
+    "CTC-1": {
+      "schedule": "CTC-1",
+      "name": "Commitment to Community Rider",
+      "type": "rider_mandatory",
+      "legalBasis": "1999 Wisconsin Act 9 and 2005 Wisconsin Act 141; Wis. Stats. §§ 16.957(5) and 196.374(7)",
+      "purpose": "Low-income assistance (50% of fees) and energy efficiency programs (50% of fees)",
+      "utilityAverageTarget": "$16 per meter per year",
+      "overallCap": "Lesser of 3% of all other billed electric charges or $750 per month",
+      "taxTreatment": "Not subject to Gross Receipts or Sales Taxes",
+      "ratesBySchedule": {
+        "Rg-1": { "rate_pct": 3.0, "cap_per_month": 0.97 },
+        "Rg-2": { "rate_pct": 3.0, "cap_per_month": 0.97 },
+        "Gs-1": { "rate_pct": 3.0, "cap_per_month": 1.95 },
+        "Gs-2": { "rate_pct": 3.0, "cap_per_month": 1.95 },
+        "Cp-1": { "rate_pct": 3.0, "cap_per_month": 16.35 },
+        "Cp-2": { "rate_pct": 3.0, "cap_per_month": 49.85 },
+        "Cp-3": { "rate_pct": 3.0, "cap_per_month": 82.50 },
+        "Cp-4": { "rate_pct": 3.0, "cap_per_month": 225.00 },
+        "Ms-1": { "rate_pct": 0, "cap_per_month": 0 },
+        "Ms-3": { "rate_pct": 0, "cap_per_month": 0 }
+      },
+      "contact": "Menasha Utilities (920) 967-3405"
+    },
+
+    "RER-1": {
+      "schedule": "RER-1",
+      "name": "Renewable Energy Rider",
+      "type": "rider_optional",
+      "applicability": "All customers on all rate schedules. Optional.",
+      "blockSize_kWh": 300,
+      "blockCharge": {
+        "less_than_20_blocks_per_month_per_block": 2.00,
+        "20_or_more_blocks_per_month_per_block": 1.00
+      },
+      "notes": [
+        "Renewable energy sold in 300 kWh/month blocks only",
+        "Block Charge is in addition to regular monthly charges including PCAC",
+        "Service may be limited at utility's discretion based on available renewable energy, usage history, and payment history",
+        "Aggregate sales allowed only for multiple facilities owned by the same entity",
+        "Service effective beginning of next full billing period after sign-up; Block Charge not prorated",
+        "If customer uses less than purchased blocks, billed for all purchased blocks",
+        "Cancellation effective beginning of next full billing period; not prorated"
+      ]
+    },
+
+    "TE-1": {
+      "schedule": "TE-1",
+      "name": "Telecom Equipment Service – Unmetered",
+      "type": "unmetered_telecom",
+      "applicability": "Local Exchange Carriers (LECs) and WAN/LAN Radio Transceiver customers requiring electric connection to customer-owned or leased equipment. Limited to locations where metered service is not readily available and individual LEC-owned/leased equipment draws less power than can be practically/economically metered.",
+      "customerCharge_per_connection_per_month": {
+        "single_phase": 8.75
+      },
+      "energyCharge": "Same rate as Gs-1 ($0.1164/kWh)",
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge",
+      "unmeteredUsageEstimation": "Monthly billed kWh = maximum hourly energy consumption (kW per manufacturer specs, confirmed by utility) × 730 hours",
+      "maxUsagePerConnection_watts": 5000,
+      "serviceAgreement": "Required. Specifies max hourly consumption per device, testing requirements, and customer-specific terms.",
+      "keyConditions": [
+        "Customer must notify utility within 30 days of any equipment additions, subtractions, replacements, or modifications",
+        "Failure to notify may result in back-billing up to 2 years and/or service cancellation",
+        "All customer equipment must be available for utility testing at least 30 days prior to energization",
+        "Testing waived if same brand/model previously tested by utility",
+        "Customer waives right to billing adjustment claims on any alternative rate"
+      ]
+    },
+
+    "OC-1": {
+      "schedule": "OC-1",
+      "name": "Other Charges and Billing Provisions",
+      "type": "miscellaneous_charges",
+      "budgetPaymentPlan": "Available per Wis. Admin. Code ch. PSC 113. No fixed budget year. Monthly amount = estimated annual bill / 12. Last month includes year-end adjustment.",
+      "reconnectionCharge": {
+        "during_regular_hours": 42.00,
+        "after_hours_minimum": 42.00,
+        "after_hours_maximum": 90.00,
+        "note": "After-hours: $42 minimum plus overtime labor costs, not exceeding $90 total"
+      },
+      "seasonalReconnection": "Same reconnection charges plus all minimum bills that would have accrued had customer not temporarily disconnected",
+      "returnedPaymentCharge": 32.00,
+      "averageDepreciatedEmbeddedCost": {
+        "residentialService_per_customer": 207.63,
+        "apartmentRentalSeparatelyMetered_per_unit": 207.63,
+        "subdividersResidentialDevelopers_per_unit": 207.63,
+        "generalService_per_customer": 531.71,
+        "powerService_per_kW_avg_billed_demand": {
+          "Cp-1": 110.54,
+          "Cp-2": 93.08,
+          "Cp-3": 63.49,
+          "Cp-4": 32.86
+        },
+        "streetLighting_per_fixture": 26.59
+      }
+    }
+  }
+}
