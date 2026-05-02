@@ -72,50 +72,50 @@ MENASHA_RATES_2021 = {
     "Rg-1":  {"name": "Rg-1 – Residential",
                "cust": {"single": 10.50, "three": 19.00},
                "energy": {"flat": 0.1063}, "dc": None, "dd": None,
-               "tou": False, "lim": None, "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+               "tou": False, "lim": None, "ctc": {"pct": 0.03, "cap": 0.97}, "pcac2": False},
 
     "Rg-2":  {"name": "Rg-2 – Residential TOD",
                "cust": {"single": 10.50, "three": 19.00},
                "energy": {"on": 0.1950, "off": 0.0559}, "dc": None, "dd": None,
-               "tou": True, "lim": None, "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+               "tou": True, "lim": None, "ctc": {"pct": 0.03, "cap": 0.97}, "pcac2": False},
 
     "Gs-1":  {"name": "Gs-1 – General Service",
                "cust": {"single": 11.00, "three": 20.00},
                "energy": {"flat": 0.1086}, "dc": None, "dd": None,
-               "tou": False, "lim": None, "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+               "tou": False, "lim": None, "ctc": {"pct": 0.03, "cap": 1.95}, "pcac2": False},
 
     "Gs-2":  {"name": "Gs-2 – General Service TOD",
                "cust": {"single": 11.00, "three": 20.00},
                "energy": {"on": 0.1910, "off": 0.0558}, "dc": None, "dd": None,
-               "tou": True, "lim": None, "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+               "tou": True, "lim": None, "ctc": {"pct": 0.03, "cap": 1.95}, "pcac2": False},
 
     "Cp-1":  {"name": "Cp-1 – Small Power (50–200 kW)",
                "cust": {"single": 50.00, "three": 50.00},
                "energy": {"on": 0.0864, "off": 0.0541},
                "dc": {"peak": 7.50, "shoulder": 7.50, "other": 7.50},
                "dd": 1.50, "tou": True, "lim": 0.1352,
-               "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+               "ctc": {"pct": 0.03, "cap": 16.35}, "pcac2": False},
 
     "Cp-2":  {"name": "Cp-2 – Large Power TOD (200–1,000 kW)",
                "cust": {"single": 200.00, "three": 200.00},
                "energy": {"on": 0.0699, "off": 0.0472},
                "dc": {"peak": 10.00, "shoulder": 10.00, "other": 10.00},
                "dd": 1.50, "tou": True, "lim": None,
-               "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+               "ctc": {"pct": 0.03, "cap": 49.85}, "pcac2": False},
 
     "Cp-3":  {"name": "Cp-3 – Industrial TOD (1,000–5,000 kW)",
                "cust": {"single": 300.00, "three": 300.00},
                "energy": {"on": 0.0612, "off": 0.0413},
                "dc": {"peak": 10.50, "shoulder": 10.50, "other": 10.50},
                "dd": 1.50, "tou": True, "lim": None,
-               "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+               "ctc": {"pct": 0.03, "cap": 82.50}, "pcac2": False},
 
     "Cp-4":  {"name": "Cp-4 – Large Industrial TOD (5,000+ kW)",
                "cust": {"single": 500.00, "three": 500.00},
                "energy": {"on": 0.0472, "off": 0.0291},
                "dc": {"peak": 22.75, "shoulder": 19.00, "other": 17.50},
                "dd": 1.50, "tou": True, "lim": None,
-               "ctc": {"pct": 0.03, "cap": None}, "pcac2": True},
+               "ctc": {"pct": 0.03, "cap": 227.00}, "pcac2": True},
 }
 
 # ── PCAC2 constants by rate period ────────────────────────────────────────────
@@ -216,71 +216,77 @@ def calc_menasha_bill(rate_key: str, inp: MenashaInputs) -> BillResult:
     lines.append(BillLine(f"Customer charge ({inp.phase}-phase)", cust))
     total += cust
 
-    # Distribution demand (demand schedules only)
+    # Distribution demand (demand schedules only) — gross, no discounts yet
+    dist_cost_gross = 0.0
     dist_cost = 0.0
     if r["dd"]:
-        dist_cost = inp.dist_demand_kw * r["dd"]
-        if pm:
-            dist_cost *= 0.98
-        if inp.xfmr_ownership:
-            dist_cost -= inp.dist_demand_kw * 0.25
-        label = f"Distribution demand ({inp.dist_demand_kw:,.2f} kW × ${r['dd']:.2f}/kW"
-        if pm:
-            label += " ×0.98"
-        if inp.xfmr_ownership:
-            label += " − $0.25/kW xfmr"
-        label += ")"
-        lines.append(BillLine(label, dist_cost))
-        total += dist_cost
+        dist_cost_gross = inp.dist_demand_kw * r["dd"]
+        lines.append(BillLine(
+            f"Distribution demand ({inp.dist_demand_kw:,.2f} kW × ${r['dd']:.2f}/kW)",
+            dist_cost_gross))
+        total += dist_cost_gross
+        dist_cost = dist_cost_gross  # used for minimum bill check below
 
-    # Energy charges
-    energy_cost = 0.0
+    # Energy charges — always compute GROSS first
+    energy_cost_gross = 0.0
     if r["tou"] and "on" in r["energy"]:
-        e_on = inp.on_peak_kwh * r["energy"]["on"]
-        e_off = inp.off_peak_kwh * r["energy"]["off"]
-        if pm:
-            e_on *= 0.98
-            e_off *= 0.98
-        energy_cost = e_on + e_off
+        e_on_gross  = inp.on_peak_kwh  * r["energy"]["on"]
+        e_off_gross = inp.off_peak_kwh * r["energy"]["off"]
+        energy_cost_gross = e_on_gross + e_off_gross
         lines.append(BillLine(
-            f"On-peak energy ({inp.on_peak_kwh:,.0f} kWh × ${r['energy']['on']:.4f}{' ×0.98' if pm else ''})",
-            e_on))
+            f"On-peak energy ({inp.on_peak_kwh:,.0f} kWh × ${r['energy']['on']:.4f})",
+            e_on_gross))
         lines.append(BillLine(
-            f"Off-peak energy ({inp.off_peak_kwh:,.0f} kWh × ${r['energy']['off']:.4f}{' ×0.98' if pm else ''})",
-            e_off))
+            f"Off-peak energy ({inp.off_peak_kwh:,.0f} kWh × ${r['energy']['off']:.4f})",
+            e_off_gross))
     else:
-        energy_cost = inp.total_kwh * r["energy"]["flat"]
-        if pm:
-            energy_cost *= 0.98
+        energy_cost_gross = inp.total_kwh * r["energy"]["flat"]
         lines.append(BillLine(
-            f"Energy ({inp.total_kwh:,.0f} kWh × ${r['energy']['flat']:.4f}{' ×0.98' if pm else ''})",
-            energy_cost))
+            f"Energy ({inp.total_kwh:,.0f} kWh × ${r['energy']['flat']:.4f})",
+            energy_cost_gross))
 
-    # Demand charge
-    demand_cost = 0.0
+    # Demand charge — always compute GROSS first
+    demand_cost_gross = 0.0
     if r["dc"]:
         dc_rate = r["dc"][inp.month_type]
-        demand_cost = inp.on_peak_demand_kw * dc_rate
-        if pm:
-            demand_cost *= 0.98
+        demand_cost_gross = inp.on_peak_demand_kw * dc_rate
         lines.append(BillLine(
-            f"On-peak demand ({inp.on_peak_demand_kw:,.2f} kW × ${dc_rate:.3f}/kW{' ×0.98' if pm else ''})",
-            demand_cost))
+            f"On-peak demand ({inp.on_peak_demand_kw:,.2f} kW × ${dc_rate:.3f}/kW)",
+            demand_cost_gross))
 
-    # Energy limiter (Cp-1 only)
+    # Energy limiter (Cp-1 only) — applied to gross before discounts
     if r["lim"]:
         limiter_total = inp.total_kwh * r["lim"]
-        combo = energy_cost + demand_cost
+        combo = energy_cost_gross + demand_cost_gross
         if limiter_total < combo:
+            # Replace energy+demand with limiter
+            energy_cost_gross = limiter_total
+            demand_cost_gross = 0.0
             lines.append(BillLine(
                 f"Energy limiter applied ({inp.total_kwh:,.0f} kWh × ${r['lim']:.4f}) — less than demand+energy",
                 limiter_total))
-            total += limiter_total
         else:
-            lines.append(BillLine("Demand + energy (limiter not triggered)", combo))
-            total += combo
-    else:
-        total += energy_cost + demand_cost
+            lines.append(BillLine("Demand + energy (limiter not triggered)",
+                                  energy_cost_gross + demand_cost_gross))
+
+    # Now apply discounts as SEPARATE lines (matching bill presentation)
+    pm_disc   = 0.0
+    xfmr_disc = 0.0
+    if pm:
+        # 2% applies to: distribution demand (gross) + energy (gross) + demand (gross)
+        pm_base = dist_cost_gross + energy_cost_gross + demand_cost_gross
+        pm_disc = -pm_base * 0.02
+        lines.append(BillLine(
+            f"Primary metering discount (−2% on energy + demand + dist demand)",
+            pm_disc, is_credit=True))
+
+    if inp.xfmr_ownership and r["dd"]:
+        xfmr_disc = -(inp.dist_demand_kw * 0.25)
+        lines.append(BillLine(
+            f"Transformer ownership discount (${inp.dist_demand_kw:,.2f} kW × $0.25/kW)",
+            xfmr_disc, is_credit=True))
+
+    total += energy_cost_gross + demand_cost_gross + pm_disc + xfmr_disc
 
     # PCAC / PCAC2
     if r["pcac2"]:
@@ -324,7 +330,7 @@ def calc_menasha_bill(rate_key: str, inp: MenashaInputs) -> BillResult:
         total += tax_amount
 
     # Minimum bill check
-    min_bill = cust + dist_cost if r["dd"] else cust
+    min_bill = cust + dist_cost_gross if r["dd"] else cust
     if total < min_bill:
         adj = min_bill - total
         lines.append(BillLine("Minimum bill adjustment", adj))
