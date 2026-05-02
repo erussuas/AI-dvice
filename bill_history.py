@@ -255,6 +255,15 @@ def process_menasha_history(df: pd.DataFrame) -> pd.DataFrame:
 
     records = []
     for _, row in df.iterrows():
+        # Determine rate period from billing_period column (YYYY-MM)
+        billing_period_str = str(row.get("billing_period", ""))
+        try:
+            from datetime import date as _date
+            yr, mo = int(billing_period_str[:4]), int(billing_period_str[5:7])
+            bill_date = _date(yr, mo, 1)
+        except Exception:
+            bill_date = None
+
         inp = MenashaInputs(
             on_peak_kwh=float(row.get("on_peak_kwh", 0)),
             off_peak_kwh=float(row.get("off_peak_kwh", 0)),
@@ -269,6 +278,7 @@ def process_menasha_history(df: pd.DataFrame) -> pd.DataFrame:
             eca_rate=float(row.get("eca_rate", 0)),
             dca_rate=float(row.get("dca_rate", 0)),
             pcac2_mode="direct",
+            billing_date=bill_date,
         )
         rate_key = str(row.get("rate_schedule", "Cp-4"))
         try:

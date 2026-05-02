@@ -1,0 +1,280 @@
+{
+  "utility": "Menasha Electric and Water Utilities",
+  "state": "Wisconsin",
+  "regulator": "Public Service Commission of Wisconsin (PSCW)",
+  "docket": "3560-ER-107",
+  "amendment": "APDX",
+  "final_decision_date": "2020-12-17",
+  "effective_date": "2020-12-18",
+  "effective_through": "2025-05-31",
+  "notes": "Final Decision dated December 17, 2020. Effective one day after date of service per Order paragraph 1. Rates in effect from approximately late December 2020 through May 31, 2025. Superseded by Amendment No. 87 (Docket 3560-ER-108) effective June 1, 2025.",
+  "currency": "USD",
+
+  "adjustmentClauses": {
+    "PCAC": {
+      "schedule": "PCAC",
+      "description": "Power Cost Adjustment Clause — applies to all non-PCAC2 metered rates",
+      "applicableTo": ["Rg-1","Rg-2","Gs-1","Gs-2","Cp-1","Cp-2","Cp-3","Ms-1","Ms-3"],
+      "formula": "A = (C / S) - U",
+      "variables": {
+        "A": "Power cost adjustment rate ($/kWh), rounded to 4 decimal places",
+        "C": "Non-PCAC2 cost of power purchased in the most recent month ($). Recorded in Acct 555 (Class A&B) or Acct 545 (Class C)",
+        "S": "Total non-PCAC2 kWh sold in the most recent month",
+        "U": "Base cost of power = $0.0727/kWh (constant until changed by PSCW)"
+      },
+      "baseCost_per_kWh": 0.0727,
+      "roundingRule": "Nearest 1/100th of a cent",
+      "notificationTrigger": "If monthly adjustment exceeds $0.0150/kWh more than 3 times in any 12-month rolling period, utility must notify PSCW"
+    },
+    "PCAC2": {
+      "schedule": "PCAC2",
+      "description": "Power Cost Adjustment Clause 2 — applies exclusively to Cp-4 tariff",
+      "applicableTo": ["Cp-4"],
+      "demandCostAdjustment": {
+        "formula": "DCA = (WDC / RBD) - BDCF",
+        "BDCF_by_month": {
+          "July_August": 23.2413,
+          "June_September": 19.4858,
+          "all_other_months": 18.0153
+        }
+      },
+      "energyCostAdjustment": {
+        "formula": "ECA = (WEC / RE) - BECF",
+        "BECF_per_kWh": 0.0328
+      }
+    }
+  },
+
+  "rateSchedules": {
+
+    "Rg-1": {
+      "schedule": "Rg-1",
+      "name": "Residential Service",
+      "type": "energy_only",
+      "customerCharge": {
+        "single_phase_per_month": 10.50,
+        "three_phase_per_month": 19.00
+      },
+      "energyCharge_per_kWh": 0.1063,
+      "demandCharge": null,
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge",
+      "CTC1_rider": {
+        "rate_pct": 3.0,
+        "cap_per_month": null,
+        "notes": "CTC-1 caps not explicitly stated in ER-107 tariff sheets — apply statutory caps per Wis. Stats."
+      }
+    },
+
+    "Rg-2": {
+      "schedule": "Rg-2",
+      "name": "Residential Service – Optional Time of Day",
+      "type": "time_of_use",
+      "customerCharge": {
+        "single_phase_per_month": 10.50,
+        "three_phase_per_month": 19.00
+      },
+      "energyCharge_per_kWh": {
+        "on_peak": 0.1950,
+        "off_peak": 0.0559
+      },
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times including all day Saturday, Sunday, and holidays"
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge"
+    },
+
+    "Gs-1": {
+      "schedule": "Gs-1",
+      "name": "General Service",
+      "type": "energy_only",
+      "customerCharge": {
+        "single_phase_per_month": 11.00,
+        "three_phase_per_month": 20.00
+      },
+      "energyCharge_per_kWh": 0.1086,
+      "demandCharge": null,
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge"
+    },
+
+    "Gs-2": {
+      "schedule": "Gs-2",
+      "name": "General Service – Optional Time of Day",
+      "type": "time_of_use",
+      "customerCharge": {
+        "single_phase_per_month": 11.00,
+        "three_phase_per_month": 20.00
+      },
+      "energyCharge_per_kWh": {
+        "on_peak": 0.1910,
+        "off_peak": 0.0558
+      },
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times including all day Saturday, Sunday, and holidays"
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge"
+    },
+
+    "Cp-1": {
+      "schedule": "Cp-1",
+      "name": "Small Power Service",
+      "type": "demand_and_energy_tou",
+      "eligibility": "Maximum Measured Demand >50 kW and ≤200 kW for 3+ consecutive months",
+      "customerCharge_per_month": 50.00,
+      "distributionDemandCharge_per_kW": 1.50,
+      "demandCharge_per_kW_onPeak": 7.50,
+      "energyCharge_per_kWh": {
+        "on_peak": 0.0864,
+        "off_peak": 0.0541
+      },
+      "energyLimiter_per_kWh": 0.1352,
+      "energyLimiterLogic": "Each month billed at LESSER of: (1) Energy Limiter × total kWh, OR (2) Energy Charge + Demand Charge. Customer charge, distribution demand charge, and PCAC always billed regardless.",
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times"
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge + distribution demand charge",
+      "discounts": {
+        "primaryMetering": { "discount_pct": 2.00, "appliesTo": ["energy charge","distribution demand charge","demand charge"], "excludes": ["PCAC","customer charge"] },
+        "transformerOwnership": { "credit_per_kW_distribution_demand": 0.25 }
+      }
+    },
+
+    "Cp-2": {
+      "schedule": "Cp-2",
+      "name": "Large Power Time of Day Service",
+      "type": "demand_and_energy_tou",
+      "eligibility": "Maximum Measured Demand >200 kW and ≤1,000 kW for 3+ consecutive months",
+      "customerCharge_per_month": 200.00,
+      "distributionDemandCharge_per_kW": 1.50,
+      "demandCharge_per_kW_onPeak": 10.00,
+      "energyCharge_per_kWh": {
+        "on_peak": 0.0699,
+        "off_peak": 0.0472
+      },
+      "energyLimiter": null,
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times"
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge + distribution demand charge",
+      "discounts": {
+        "primaryMetering": { "discount_pct": 2.00, "appliesTo": ["energy charge","distribution demand charge","demand charge"], "excludes": ["PCAC","customer charge"] },
+        "transformerOwnership": { "credit_per_kW_distribution_demand": 0.25 }
+      }
+    },
+
+    "Cp-3": {
+      "schedule": "Cp-3",
+      "name": "Industrial Power Time-of-Day Service",
+      "type": "demand_and_energy_tou",
+      "eligibility": "Maximum Measured Demand >1,000 kW and ≤5,000 kW for 3+ consecutive months",
+      "customerCharge_per_month": 300.00,
+      "distributionDemandCharge_per_kW": 1.50,
+      "demandCharge_per_kW_onPeak": 10.50,
+      "energyCharge_per_kWh": {
+        "on_peak": 0.0612,
+        "off_peak": 0.0413
+      },
+      "energyLimiter": null,
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times"
+      },
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge + distribution demand charge",
+      "discounts": {
+        "primaryMetering": { "discount_pct": 2.00, "appliesTo": ["energy charge","distribution demand charge","demand charge"], "excludes": ["PCAC","customer charge"] },
+        "transformerOwnership": { "credit_per_kW_distribution_demand": 0.25 }
+      }
+    },
+
+    "Cp-4": {
+      "schedule": "Cp-4",
+      "name": "Large Industrial Power Time-of-Day Service",
+      "type": "demand_and_energy_tou",
+      "eligibility": "Maximum Measured Demand >5,000 kW for 3+ consecutive months",
+      "customerCharge_per_month": 500.00,
+      "distributionDemandCharge_per_kW": 1.50,
+      "demandCharge_per_kW_onPeak": {
+        "July_August": 22.75,
+        "June_September": 19.00,
+        "all_other_months": 17.50
+      },
+      "energyCharge_per_kWh": {
+        "on_peak": 0.0472,
+        "off_peak": 0.0291
+      },
+      "energyLimiter": null,
+      "pricingPeriods": {
+        "on_peak": "8:00 AM – 8:00 PM, Monday–Friday, excluding holidays",
+        "off_peak": "All other times"
+      },
+      "adjustmentClause": "PCAC2",
+      "PCAC2_baseCosts": {
+        "BDCF_July_August": 23.2413,
+        "BDCF_June_September": 19.4858,
+        "BDCF_all_other_months": 18.0153,
+        "BECF_per_kWh": 0.0328
+      },
+      "minimumBill": "Customer charge + distribution demand charge",
+      "discounts": {
+        "primaryMetering": { "discount_pct": 2.00, "appliesTo": ["energy charge","distribution demand charge","demand charge"], "excludes": ["PCAC2","customer charge"] },
+        "transformerOwnership": { "credit_per_kW_distribution_demand": 0.25 }
+      }
+    },
+
+    "Ms-1": {
+      "schedule": "Ms-1",
+      "name": "Lighting Service",
+      "type": "lighting",
+      "energyCharge_per_kWh": 0.0534,
+      "adjustmentClause": "PCAC",
+      "CTC1_rider": "No Charge"
+    },
+
+    "Ms-3": {
+      "schedule": "Ms-3",
+      "name": "Athletic Field Lighting Service",
+      "type": "lighting",
+      "customerCharge_per_month": 187.00,
+      "energyCharge_per_kWh": 0.0568,
+      "adjustmentClause": "PCAC",
+      "minimumBill": "Customer charge",
+      "CTC1_rider": "No Charge"
+    }
+  },
+
+  "otherCharges": {
+    "NSF_charge": 32.00,
+    "reconnection_during_office_hours": 42.00,
+    "reconnection_after_hours_max": 90.00,
+    "embeddedCostAllowances": {
+      "Rg-1_Rg-2_per_customer": 244.00,
+      "Gs-1_Gs-2_per_customer": 617.00,
+      "Cp-1_per_kW": 118.00,
+      "Cp-2_per_kW": 100.00,
+      "Cp-3_per_kW": 59.00,
+      "Cp-4_per_kW": 35.00,
+      "Ms-1_per_lamp": 30.00
+    }
+  },
+
+  "keyChangesFromPriorRateCase": {
+    "priorDocket": "3560-ER-106",
+    "priorEffectiveDate": "2018-02-28",
+    "overallRateIncrease_pct": 1.58,
+    "overallRateIncrease_dollars": 647661,
+    "Cp-4_demandStructureChange": "Replaced single flat $19.01/kW demand charge with three seasonal tiers: $22.75 (Jul/Aug), $19.00 (Jun/Sep), $17.50 (other months)",
+    "PCAC_baseCost_change": "Reduced from $0.0749/kWh to $0.0727/kWh",
+    "PCAC2_BECF_change": "Reduced from $0.0329/kWh to $0.0328/kWh",
+    "PCAC2_BDCF_change": "New seasonal structure replacing flat $21.596/kW: $23.2413 Jul/Aug, $19.4858 Jun/Sep, $18.0153 other"
+  }
+}

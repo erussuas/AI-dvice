@@ -1,13 +1,22 @@
 """
 Menasha Electric & Water Utilities — Billing Engine
-Amendment No. 87, effective June 1, 2025
-Docket 3560-ER-108
+Supports two rate periods:
+  - Docket 3560-ER-107: effective ~Dec 18, 2020 through May 31, 2025
+  - Docket 3560-ER-108 (Amendment No. 87): effective June 1, 2025 onward
 """
 
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Optional
 
-# ── Rate definitions ──────────────────────────────────────────────────────────
+# ── Rate period boundary ──────────────────────────────────────────────────────
+RATE_CHANGE_DATE = date(2025, 6, 1)   # Amendment 87 effective date
+
+def get_rate_period(billing_date: date) -> str:
+    """Return '2021' for pre-June-2025 bills, '2025' for current rates."""
+    return "2025" if billing_date >= RATE_CHANGE_DATE else "2021"
+
+# ── Amendment 87 rates — effective June 1, 2025 (Docket 3560-ER-108) ─────────
 MENASHA_RATES = {
     "Rg-1":  {"name": "Rg-1 – Residential",
                "cust": {"single": 12.00, "three": 21.00},
@@ -58,8 +67,85 @@ MENASHA_RATES = {
                "ctc": {"pct": 0.03, "cap": 225.00}, "pcac2": True},
 }
 
-BDCF = {"peak": 21.853, "shoulder": 17.962, "other": 16.497}
-BECF = 0.0432
+# ── Docket 3560-ER-107 rates — effective ~Dec 18, 2020 through May 31, 2025 ──
+MENASHA_RATES_2021 = {
+    "Rg-1":  {"name": "Rg-1 – Residential",
+               "cust": {"single": 10.50, "three": 19.00},
+               "energy": {"flat": 0.1063}, "dc": None, "dd": None,
+               "tou": False, "lim": None, "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+
+    "Rg-2":  {"name": "Rg-2 – Residential TOD",
+               "cust": {"single": 10.50, "three": 19.00},
+               "energy": {"on": 0.1950, "off": 0.0559}, "dc": None, "dd": None,
+               "tou": True, "lim": None, "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+
+    "Gs-1":  {"name": "Gs-1 – General Service",
+               "cust": {"single": 11.00, "three": 20.00},
+               "energy": {"flat": 0.1086}, "dc": None, "dd": None,
+               "tou": False, "lim": None, "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+
+    "Gs-2":  {"name": "Gs-2 – General Service TOD",
+               "cust": {"single": 11.00, "three": 20.00},
+               "energy": {"on": 0.1910, "off": 0.0558}, "dc": None, "dd": None,
+               "tou": True, "lim": None, "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+
+    "Cp-1":  {"name": "Cp-1 – Small Power (50–200 kW)",
+               "cust": {"single": 50.00, "three": 50.00},
+               "energy": {"on": 0.0864, "off": 0.0541},
+               "dc": {"peak": 7.50, "shoulder": 7.50, "other": 7.50},
+               "dd": 1.50, "tou": True, "lim": 0.1352,
+               "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+
+    "Cp-2":  {"name": "Cp-2 – Large Power TOD (200–1,000 kW)",
+               "cust": {"single": 200.00, "three": 200.00},
+               "energy": {"on": 0.0699, "off": 0.0472},
+               "dc": {"peak": 10.00, "shoulder": 10.00, "other": 10.00},
+               "dd": 1.50, "tou": True, "lim": None,
+               "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+
+    "Cp-3":  {"name": "Cp-3 – Industrial TOD (1,000–5,000 kW)",
+               "cust": {"single": 300.00, "three": 300.00},
+               "energy": {"on": 0.0612, "off": 0.0413},
+               "dc": {"peak": 10.50, "shoulder": 10.50, "other": 10.50},
+               "dd": 1.50, "tou": True, "lim": None,
+               "ctc": {"pct": 0.03, "cap": None}, "pcac2": False},
+
+    "Cp-4":  {"name": "Cp-4 – Large Industrial TOD (5,000+ kW)",
+               "cust": {"single": 500.00, "three": 500.00},
+               "energy": {"on": 0.0472, "off": 0.0291},
+               "dc": {"peak": 22.75, "shoulder": 19.00, "other": 17.50},
+               "dd": 1.50, "tou": True, "lim": None,
+               "ctc": {"pct": 0.03, "cap": None}, "pcac2": True},
+}
+
+# ── PCAC2 constants by rate period ────────────────────────────────────────────
+BDCF_BY_PERIOD = {
+    "2021": {"peak": 23.2413, "shoulder": 19.4858, "other": 18.0153},
+    "2025": {"peak": 21.853,  "shoulder": 17.962,  "other": 16.497},
+}
+BECF_BY_PERIOD = {
+    "2021": 0.0328,
+    "2025": 0.0432,
+}
+PCAC_BASE_BY_PERIOD = {
+    "2021": 0.0727,
+    "2025": 0.0792,
+}
+
+# Keep backward-compatible aliases (default to current period)
+BDCF = BDCF_BY_PERIOD["2025"]
+BECF = BECF_BY_PERIOD["2025"]
+
+
+def get_rates(billing_date: date = None, period: str = None) -> dict:
+    """
+    Return the correct rate table for a given billing date or period string.
+    period: '2021' | '2025'  (overrides billing_date if provided)
+    billing_date: a datetime.date object
+    """
+    if period is None:
+        period = get_rate_period(billing_date) if billing_date else "2025"
+    return MENASHA_RATES_2021 if period == "2021" else MENASHA_RATES
 
 
 @dataclass
@@ -82,6 +168,9 @@ class MenashaInputs:
     wdc: float = 0.0
     rbd: float = 0.0
     wec: float = 0.0
+    # Rate period — drives which tariff table is used
+    billing_date: date = None   # if set, auto-selects period
+    rate_period: str = None     # "2021" | "2025" — overrides billing_date
 
     @property
     def total_kwh(self):
@@ -108,7 +197,16 @@ class BillResult:
 
 
 def calc_menasha_bill(rate_key: str, inp: MenashaInputs) -> BillResult:
-    r = MENASHA_RATES[rate_key]
+    # Resolve rate period
+    period = inp.rate_period or (
+        get_rate_period(inp.billing_date) if inp.billing_date else "2025"
+    )
+    rates = get_rates(period=period)
+    r = rates[rate_key]
+
+    bdcf = BDCF_BY_PERIOD[period]
+    becf = BECF_BY_PERIOD[period]
+
     pm = inp.primary_metering
     lines = []
     total = 0.0
@@ -188,9 +286,8 @@ def calc_menasha_bill(rate_key: str, inp: MenashaInputs) -> BillResult:
     if r["pcac2"]:
         # Resolve ECA/DCA
         if inp.pcac2_mode == "formula" and inp.rbd > 0:
-            bdcf = BDCF[inp.month_type]
-            dca = (inp.wdc / inp.rbd) - bdcf
-            eca = (inp.wec / inp.total_kwh) - BECF if inp.total_kwh > 0 else 0.0
+            dca = (inp.wdc / inp.rbd) - bdcf[inp.month_type]
+            eca = (inp.wec / inp.total_kwh) - becf if inp.total_kwh > 0 else 0.0
         else:
             dca = inp.dca_rate
             eca = inp.eca_rate
@@ -211,9 +308,11 @@ def calc_menasha_bill(rate_key: str, inp: MenashaInputs) -> BillResult:
         total += pcac_charge
 
     # CTC-1 rider
-    ctc = min(total * r["ctc"]["pct"], r["ctc"]["cap"])
-    lines.append(BillLine(
-        f"CTC-1 rider (3.0% of bill, cap ${r['ctc']['cap']:.2f})", ctc))
+    ctc = total * r["ctc"]["pct"]
+    if r["ctc"]["cap"] is not None:
+        ctc = min(ctc, r["ctc"]["cap"])
+    cap_label = f", cap ${r['ctc']['cap']:.2f}" if r["ctc"]["cap"] is not None else ""
+    lines.append(BillLine(f"CTC-1 rider (3.0% of bill{cap_label})", ctc))
     total += ctc
 
     # Sales tax

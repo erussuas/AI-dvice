@@ -30,6 +30,21 @@ def _render_single_bill():
     st.markdown("### Single Bill — Enter usage data and compare two rate schedules")
     st.caption("Pre-loaded with Sonoco U.S. Paper Mills — January 2026 (Cp-4). Edit any field to model scenarios.")
 
+    # Rate period selector
+    rate_period = st.radio(
+        "Rate period",
+        ["2025", "2021"],
+        format_func=lambda x: {
+            "2025": "📋 Current rates — Amendment No. 87 (June 1, 2025 – present, Docket 3560-ER-108)",
+            "2021": "📋 Prior rates — Docket 3560-ER-107 (Dec 18, 2020 – May 31, 2025)",
+        }[x],
+        horizontal=True,
+    )
+    if rate_period == "2021":
+        st.info("Using rates from Docket 3560-ER-107 (Final Decision Dec 17, 2020). "
+                "PCAC base = $0.0727/kWh · BECF = $0.0328/kWh · "
+                "Cp-4 BDCF: Jul/Aug $23.2413, Jun/Sep $19.4858, Other $18.0153")
+
     with st.expander("📥 Monthly Usage Inputs", expanded=True):
         c1, c2, c3 = st.columns(3)
         with c1:
@@ -82,6 +97,7 @@ def _render_single_bill():
         sales_tax_pct=sales_tax_pct,
         eca_rate=eca_rate, dca_rate=dca_rate, pcac2_mode=pcac2_mode,
         wdc=wdc, rbd=rbd, wec=wec,
+        rate_period=rate_period,
     )
 
     bill_a = calc_menasha_bill(rate_a, inp)
